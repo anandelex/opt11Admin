@@ -1,0 +1,168 @@
+<form id="updateForm" name="updateForm" class="form-horizontal" action="api/squad/update">
+    <div class="modal-header">
+        <h4 class="modal-title">Update Squad</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">X</button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="stxId" name="stxId" class="form-control">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serDisplayName">Series</label>
+            <label class="col-md-3 col-form-label" id="serDisplayName" name="serDisplayName"></label>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="temDisplayName">Team</label>
+            <label class="col-md-3 col-form-label" id="temDisplayName" name="temDisplayName"></label>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="cdlStatus">Players</label>
+            <div class="col-md-9">
+                <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-sm" id="sqdTbl" style="width:100%">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Players</th>
+                                <th>Role</th>
+                                <th>Price</th>
+                                <th>Points</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+						<tbody>
+                        </tbody>
+						<tfoot>
+							<tr>
+								<td colspan="5"><button type="button" id="addTblRows" class="btn btn-sm btn-success">Add Row</button></td>
+							</tr>
+						</tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitUpdate" name="btnSubmitUpdate" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseUpdate" name="btnCloseUpdate" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        delete sqdCount;
+        if (typeof players === 'undefined') {
+            var players=[];
+            $.ajax({
+                url: "api/players",
+                type: "get",
+                async: false,
+                success: function(response) {
+                    if(jQuery.isEmptyObject(players))
+                        players.push(response);
+                }
+            });
+        }
+        if (typeof playerRoles === 'undefined') {
+            var playerRoles=[];
+            $.ajax({
+                url: "api/player_roles",
+                type: "get",
+                async: false,
+                success: function(response) {
+                    if(jQuery.isEmptyObject(playerRoles))
+                        playerRoles.push(response);
+                }
+            });
+        }
+        $("#addTblRows").click(function () {
+            if (typeof sqdCount === 'undefined') sqdCount=$('#sqdTbl tbody tr').length;
+            var sqd="<tr>";
+            sqd+="<td><select class='form-control form-control-sm requiredItem' id='sqdPlrId' name='sqdPlrId["+sqdCount+"]' placeholder='Player...'><option value=''>Player...</option>";
+            $.each(JSON.parse(players), function(i, plr){
+                sqd+="<option value='"+plr.plrId+"'>"+plr.plrDisplayName+"</option>";
+            });
+            sqd+="</select></td>";
+            sqd+="<td><select class='form-control form-control-sm requiredItem' id='sqdprlId' name='sqdprlId["+sqdCount+"]' placeholder='Player Role...'><option value=''>Player Role...</option>";
+            $.each(JSON.parse(playerRoles), function(i, prl){
+                sqd+="<option value='"+prl.prlId+"'>"+prl.prlRole+"</option>";
+            });
+            sqd+="</select></td>";
+            sqd+='<td><input type="text" id="sqdPrice" name="sqdPrice['+sqdCount+']" class="form-control form-control-sm requiredItem validNumber" placeholder="Price..."></td>';
+            sqd+='<td><input type="text" id="sqdPoints" name="sqdPoints['+sqdCount+']" class="form-control form-control-sm requiredItem validNumber" placeholder="Points..."></td>';
+            sqd+='<td class="text-center"><button type="button" id="delSqd" name="delSqd['+sqdCount+']" class="delSqd btn btn-sm btn-link"><i class="fa fa-trash"></i></button><input type="hidden" id="delSqdFlag" name="delSqdFlag['+sqdCount+']" value="0" /><input type="hidden" id="sqdId" name="sqdId['+sqdCount+']" value="0" /></td>';
+            sqd+="</tr>";
+			$("#sqdTbl > tbody").append(sqd);
+			sqdCount++;
+        });
+        $(document).on('click', ".delSqd", function() {
+            if (typeof sqdCount === 'undefined') sqdCount=$('#sqdTbl tbody tr').length;
+			$(this).parents('tr').find('#delSqdFlag').val(1);
+			$(this).parents('tr').hide();
+		});
+        $("#updateForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitUpdate").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitUpdate").attr("disabled",true);
+                $.ajax({
+                    url: form.action+"/"+$("#stxId").val(),
+                    type: "post",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        squadRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+        $.ajax({
+            url: "api/squad_players/"+$("#cdlId").val(),
+            type: "get",
+            success: function(response) {
+                var squadPlayers=JSON.parse(response);
+                if (typeof players === 'undefined') {
+                    var players=[];
+                    $.ajax({
+                        url: "api/players",
+                        type: "get",
+                        async: false,
+                        success: function(response) {
+                            if(jQuery.isEmptyObject(players))
+                                players.push(response);
+                        }
+                    });
+                }
+                if (typeof playerRoles === 'undefined') {
+                    var playerRoles=[];
+                    $.ajax({
+                        url: "api/player_roles",
+                        type: "get",
+                        async: false,
+                        success: function(response) {
+                            if(jQuery.isEmptyObject(playerRoles))
+                                playerRoles.push(response);
+                        }
+                    });
+                }                
+                $.each(squadPlayers, function(key, sqd){
+                    var sqd="<tr>";
+                    sqd+="<td><select class='form-control form-control-sm requiredItem' id='sqdPlrId' name='sqdPlrId["+key+"]' placeholder='Player...'><option value=''>Player...</option>";
+                    $.each(JSON.parse(players), function(i, plr){
+                        sqd+="<option value='"+plr.plrId+"'>"+plr.plrDisplayName+"</option>";
+                    });
+                    sqd+="</select></td>";
+                    sqd+="<td><select class='form-control form-control-sm requiredItem' id='sqdprlId' name='sqdprlId["+key+"]' placeholder='Player Role...'><option value=''>Player Role...</option>";
+                    $.each(JSON.parse(playerRoles), function(i, prl){
+                        sqd+="<option value='"+prl.prlId+"'>"+prl.prlRole+"</option>";
+                    });
+                    sqd+="</select></td>";
+                    sqd+='<td><input type="text" id="sqdPrice" name="sqdPrice['+key+']" class="form-control form-control-sm requiredItem validNumber" placeholder="Price..."></td>';
+                    sqd+='<td><input type="text" id="sqdPoints" name="sqdPoints['+key+']" class="form-control form-control-sm requiredItem validNumber" placeholder="Points..."></td>';
+                    sqd+='<td class="text-center"><button type="button" id="delSqd" name="delSqd['+key+']" class="delSqd btn btn-sm btn-link"><i class="fa fa-trash"></i></button><input type="hidden" id="delSqdFlag" name="delSqdFlag['+key+']" value="0" /><input type="hidden" id="sqdId" name="sqdId['+key+']" value="0" /></td>';
+                    sqd+="</tr>";
+                    $("#sqdTbl > tbody").append(sqd);
+                })
+            }
+        });
+    });
+</script>

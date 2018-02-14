@@ -1,0 +1,92 @@
+<form id="updateForm" name="updateForm" class="form-horizontal" action="api/series/update">
+    <div class="modal-header">
+        <h4 class="modal-title">Update Series</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">X</button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="serId" name="serId" class="form-control">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serName">Series Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serName" name="serName" class="form-control form-control-sm requiredItem" placeholder="Series Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serShortName">Series Short Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serShortName" name="serShortName" class="form-control form-control-sm requiredItem" placeholder="Series Short Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serDisplayName">Series Display Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serDisplayName" name="serDisplayName" class="form-control form-control-sm requiredItem" placeholder="Series Display Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serStartDt">Start Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serStartDt" name="serStartDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Start Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serEndDt">End Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serEndDt" name="serEndDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="End Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serVisibleStartDt">Visible Start Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serVisibleStartDt" name="serVisibleStartDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Visible Start Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serVisibleEndDt">Visible End Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serVisibleEndDt" name="serVisibleEndDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Visible End Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serStatus">Status</label>
+            <div class="col-md-9">
+                <select id="serStatus" name="serStatus" class="form-control form-control-sm requiredItem" placeholder="Status...">
+                    <option value="">Status...</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="stx">Teams</label>
+            <div class="col-md-9 stx offset-0"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitUpdate" name="btnSubmitUpdate" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseUpdate" name="btnCloseUpdate" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        $("#updateForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitUpdate").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitUpdate").attr("disabled",true);
+                $.ajax({
+                    url: form.action+"/"+$("#serId").val(),
+                    type: "put",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        seriesRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+    });
+</script>

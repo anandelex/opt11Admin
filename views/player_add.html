@@ -1,0 +1,123 @@
+<form id="addForm" name="addForm" class="form-horizontal" action="api/player/add">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Player</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">x</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrName">Player Name</label>
+            <div class="col-md-9">
+                <input type="text" id="plrName" name="plrName" class="form-control form-control-sm requiredItem" placeholder="Player Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrShortName">Player Short Name</label>
+            <div class="col-md-9">
+                <input type="text" id="plrShortName" name="plrShortName" class="form-control form-control-sm requiredItem" placeholder="Player Short Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrDisplayName">Player Display Name</label>
+            <div class="col-md-9">
+                <input type="text" id="plrDisplayName" name="plrDisplayName" class="form-control form-control-sm requiredItem" placeholder="Player Display Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrDOB">DOB</label>
+            <div class="col-md-9">
+                <input type="text" id="plrDOB" name="plrDOB" class="form-control form-control-sm requiredItem validDateISO" placeholder="DOB...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrBatStyle">Batting Style</label>
+            <div class="col-md-9">
+                <select id="plrBatStyle" name="plrBatStyle" class="form-control form-control-sm requiredItem" placeholder="Batting Style...">
+                    <option value="">Batting Style...</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrBowlStyle">Bowling Style</label>
+            <div class="col-md-9">
+                <select id="plrBowlStyle" name="plrBowlStyle" class="form-control form-control-sm requiredItem" placeholder="Bowling Style...">
+                    <option value="">Bowling Style...</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrMajorRole">Major Role</label>
+            <div class="col-md-9">
+                <select id="plrMajorRole" name="plrMajorRole" class="form-control form-control-sm requiredItem" placeholder="Major Role...">
+                    <option value="">Major Role...</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="plrStatus">Status</label>
+            <div class="col-md-9">
+                <select id="plrStatus" name="plrStatus" class="form-control form-control-sm requiredItem" placeholder="Status...">
+                    <option value="">Status...</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitAdd" name="btnSubmitAdd" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseAdd" name="btnCloseAdd" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        $("#addForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitAdd").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitAdd").attr("disabled",true);
+                $.ajax({
+                    url: form.action,
+                    type: "post",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        playerRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+        $.ajax({
+            url: "api/batting_styles",
+            type: "get",
+            success: function(response) {
+                var battingStyles=JSON.parse(response);
+                $.each(battingStyles, function(key, bts){
+                    $(".remoteModalContent #plrBatStyle").append('<option value="' + bts.btsId + '">' + bts.btsStyle+ '</option>');
+                })
+            }
+        });
+        $.ajax({
+            url: "api/bowling_styles",
+            type: "get",
+            success: function(response) {
+                var bowlingStyles=JSON.parse(response);
+                $.each(bowlingStyles, function(key, bws){
+                    $(".remoteModalContent #plrBowlStyle").append('<option value="' + bws.bwsId + '">' + bws.bwsStyle+ '</option>');
+                })
+            }
+        });
+        $.ajax({
+            url: "api/player_roles",
+            type: "get",
+            success: function(response) {
+                var playerRoles=JSON.parse(response);
+                $.each(playerRoles, function(key, prl){
+                    $(".remoteModalContent #plrMajorRole").append('<option value="' + prl.prlId + '">' + prl.prlRole+ '</option>');
+                })
+            }
+        });
+    });
+</script>

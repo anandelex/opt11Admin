@@ -1,0 +1,101 @@
+<form id="addForm" name="addForm" class="form-horizontal" action="api/series/add">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Series</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">x</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serName">Series Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serName" name="serName" class="form-control form-control-sm requiredItem" placeholder="Series Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serShortName">Series Short Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serShortName" name="serShortName" class="form-control form-control-sm requiredItem" placeholder="Series Short Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serDisplayName">Series Display Name</label>
+            <div class="col-md-9">
+                <input type="text" id="serDisplayName" name="serDisplayName" class="form-control form-control-sm requiredItem" placeholder="Series Display Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serStartDt">Start Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serStartDt" name="serStartDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Start Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serEndDt">End Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serEndDt" name="serEndDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="End Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serVisibleStartDt">Visible Start Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serVisibleStartDt" name="serVisibleStartDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Visible Start Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serVisibleEndDt">Visible End Date</label>
+            <div class="col-md-9">
+                <input type="text" id="serVisibleEndDt" name="serVisibleEndDt" class="form-control form-control-sm requiredItem validDateISO" placeholder="Visible End Date...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="serStatus">Status</label>
+            <div class="col-md-9">
+                <select id="serStatus" name="serStatus" class="form-control form-control-sm requiredItem" placeholder="Status...">
+                    <option value="">Status...</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="stx">Teams</label>
+            <div class="col-md-9 stx offset-0"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitAdd" name="btnSubmitAdd" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseAdd" name="btnCloseAdd" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        $("#addForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitAdd").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitAdd").attr("disabled",true);
+                $.ajax({
+                    url: form.action,
+                    type: "post",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        seriesRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+        $.ajax({
+            url: "api/teams",
+            type: "get",
+            success: function(response) {
+                var teams=JSON.parse(response);
+                $.each(teams, function(key, tem){
+                    $(".stx").append('<div class="form-check"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="stx" name="stx[]" value="'+tem.temId+'">'+tem.temName+'</label></div>');
+                })
+            }
+        });
+    });
+</script>

@@ -1,0 +1,64 @@
+<form id="updateForm" name="updateForm" class="form-horizontal" action="api/team/update">
+    <div class="modal-header">
+        <h4 class="modal-title">Update Team</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">X</button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="temId" name="temId" class="form-control">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="temName">Team Name</label>
+            <div class="col-md-9">
+                <input type="text" id="temName" name="temName" class="form-control form-control-sm requiredItem" placeholder="Team Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="temShortName">Team Short Name</label>
+            <div class="col-md-9">
+                <input type="text" id="temShortName" name="temShortName" class="form-control form-control-sm requiredItem" placeholder="Team Short Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="temDisplayName">Team Display Name</label>
+            <div class="col-md-9">
+                <input type="text" id="temDisplayName" name="temDisplayName" class="form-control form-control-sm requiredItem" placeholder="Team Display Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="temStatus">Status</label>
+            <div class="col-md-9">
+                <select id="temStatus" name="temStatus" class="form-control form-control-sm requiredItem" placeholder="Status...">
+                    <option value="">Status...</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitUpdate" name="btnSubmitUpdate" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseUpdate" name="btnCloseUpdate" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        $("#updateForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitUpdate").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitUpdate").attr("disabled",true);
+                $.ajax({
+                    url: form.action+"/"+$("#temId").val(),
+                    type: "put",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        teamRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,97 @@
+<form id="updateForm" name="updateForm" class="form-horizontal" action="api/codelist/update">
+    <div class="modal-header">
+        <h4 class="modal-title">Update Codelist</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">X</button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="cdlId" name="cdlId" class="form-control">
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="cdlName">Codelist Name</label>
+            <div class="col-md-9">
+                <input type="text" id="cdlName" name="cdlName" class="form-control form-control-sm requiredItem" placeholder="Codelist Name...">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="cdlStatus">Status</label>
+            <div class="col-md-9">
+                <select id="cdlStatus" name="cdlStatus" class="form-control form-control-sm requiredItem" placeholder="Status...">
+                    <option value="">Status...</option>
+                    <option value="1">Active</option>
+                    <option value="2">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="cdlStatus">Values</label>
+            <div class="col-md-9">
+                <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-sm" id="codelistValueTbl" style="width:100%">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Values</th>
+                                <th>Display Text</th>
+                                <th>Order</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+						<tbody>
+                        </tbody>
+						<tfoot>
+							<tr>
+								<td colspan="4"><button type="button" id="addTblRows" class="btn btn-sm btn-success">Add Row</button></td>
+							</tr>
+						</tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="btnSubmitUpdate" name="btnSubmitUpdate" class="btn btn-primary">Save</button>
+        <button type="button" id="btnCloseUpdate" name="btnCloseUpdate" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        delete clvCount;
+        $("#addTblRows").click(function () {
+            if (typeof clvCount === 'undefined') clvCount=$('#codelistValueTbl tbody tr').length;
+			$("#codelistValueTbl > tbody").append('<tr><td><input type="text" id="clvValue" name="clvValue['+clvCount+']" class="form-control form-control-sm requiredItem validInt" placeholder="Value..."></td><td><input type="text" id="clvDisplayText" name="clvDisplayText['+clvCount+']" class="form-control form-control-sm requiredItem" placeholder="Display Text..."></td><td><input type="text" id="clvOrder" name="clvOrder['+clvCount+']" class="form-control form-control-sm requiredItem validInt" placeholder="Order..."></td><td class="text-center"><button type="button" id="delClv" name="delClv['+clvCount+']" class="delClv btn btn-sm btn-link"><i class="fa fa-trash"></i></button><input type="hidden" id="delClvFlag" name="delClvFlag['+clvCount+']" value="0" /><input type="hidden" id="clvId" name="clvId['+clvCount+']" value="0" /></td></tr>');
+			clvCount++;
+        });
+        $(document).on('click', ".delClv", function() {
+            if (typeof clvCount === 'undefined') clvCount=$('#codelistValueTbl tbody tr').length;
+			$(this).parents('tr').find('#delClvFlag').val(1);
+			$(this).parents('tr').hide();
+		});
+        $("#updateForm").validate({
+            rules: { },
+            onfocusout: injectTrim($.validator.defaults.onfocusout),
+            submitHandler: function(form) {
+                $("#btnSubmitUpdate").html('Saving <i class="fa fa-refresh fa-spin"></i>');
+                $("#btnSubmitUpdate").attr("disabled",true);
+                $.ajax({
+                    url: form.action+"/"+$("#cdlId").val(),
+                    type: "put",
+                    data: $(form).serialize(),
+                    datatype: 'json',
+                    success: function(response) {
+                        codelistRefresh();
+                        $(this).removeData();
+                        $('#remoteModal').modal('hide');
+                    }
+                });
+            }
+        });
+        $.ajax({
+            url: "api/codelist_values/"+$("#cdlId").val(),
+            type: "get",
+            success: function(response) {
+                var codelistValues=JSON.parse(response);
+                $.each(codelistValues, function(key, clv){
+                    $("#codelistValueTbl > tbody").append('<tr><td><input type="text" id="clvValue" name="clvValue['+key+']" class="form-control form-control-sm requiredItem validInt" placeholder="Value..." value="'+clv.clvValue+'"></td><td><input type="text" id="clvDisplayText" name="clvDisplayText['+key+']" class="form-control form-control-sm requiredItem" placeholder="Display Text..." value="'+clv.clvDisplayText+'"></td><td><input type="text" id="clvOrder" name="clvOrder['+key+']" class="form-control form-control-sm requiredItem validInt" placeholder="Order..." value="'+clv.clvOrder+'"></td><td class="text-center"><button type="button" id="delClv" name="delClv['+key+']" class="delClv btn btn-sm btn-link"><i class="fa fa-trash"></i></button><input type="hidden" id="delClvFlag" name="delClvFlag['+key+']" value="0" /><input type="hidden" id="clvId" name="clvId['+key+']" value="'+clv.clvId+'" /></td></tr>');
+                })
+            }
+        });
+    });
+</script>

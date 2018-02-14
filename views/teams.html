@@ -1,0 +1,31 @@
+<script>
+    var requireJS = [];
+    loadJS(requireJS, "assets/pages/teams.js");
+</script>
+<div class="animated fadeIn">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <button type="button" class="btn btn-success btn-sm addTemBtn float-right">Add Team</button>
+                    <strong>Teams</strong>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-sm" id="teamTbl" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Team Short Name</th>
+                                    <th>Team Display Name</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
